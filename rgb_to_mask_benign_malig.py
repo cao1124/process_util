@@ -484,12 +484,14 @@ def crop_by_mask():
 
 def merge_us_rgb():
     rgb_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_crop/"
-    us_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/us_label_mask"
+    us_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/us_label_mask/"
+    dst_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/"
+    make_dir(dst_dir)
     images = [x for x in os.listdir(rgb_dir) if is_image_file(x)]
     print(len(images))
 
     for img_name in images:
-        print(img_name)
+        # print(img_name)
         if os.path.exists(us_dir + img_name):
             us_img_path = us_dir + img_name
         elif os.path.exists(us_dir + img_name.split('.jpg')[0] + '.bmp'):
@@ -498,12 +500,28 @@ def merge_us_rgb():
             us_img_path = us_dir + img_name.split('.jpg')[0] + '.png'
         elif os.path.exists(us_dir + img_name.split('.jpg')[0] + '.tiff'):
             us_img_path = us_dir + img_name.split('.jpg')[0] + '.tiff'
-
+        else:
+            print(img_name)
+            us_img_path = None
         if us_img_path:
             im1 = cv_imread(rgb_dir + img_name)
-            im2 = cv_imread(us_img_path)
-            merged = np.concatenate((im1, im2), axis=2)  # creates a numpy array with 6 channels
-            cv2.imwrite('merged.tiff', merged)
+            im2 = cv_imread(us_img_path, 2)
+            im2_res = cv2.resize(im2, (im1.shape[1], im1.shape[0]))
+            im2_res = im2_res[:, :, np.newaxis]
+            merged = np.concatenate((im1, im2_res), axis=2)  # creates a numpy array with 6 channels
+            cv_write(dst_dir + img_name.split('.jpg')[0] + '.tiff', merged)
+
+
+def prepare_txt():
+    image_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/"
+    result = []
+    with open('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/839data.txt', 'r') as txt_file:
+        for item in txt_file:
+            if os.path.exists(image_dir + item.split(',')[0].split('.jpg')[0] + '.tiff'):
+                result.append(item)
+    with open('839.txt', 'w') as file:
+        for i in result:
+            file.write(i)
 
 
 if __name__ == '__main__':
@@ -514,5 +532,6 @@ if __name__ == '__main__':
     # crop_image_by_hsv()
     # make_photo_mask()
     # crop_by_mask()
-    merge_us_rgb()
+    # merge_us_rgb()
+    prepare_txt()
 
