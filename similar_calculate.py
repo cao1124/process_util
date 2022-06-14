@@ -1,6 +1,7 @@
 import os
 import scipy.spatial.distance as dist
 import tablib
+from tqdm import tqdm
 
 from resnet_feature import ResnetFeature
 from utils.image_utils import is_image_file
@@ -36,7 +37,7 @@ def similarity_calculate(target_img, query_img_dir):
         query_id = int(''.join(list(filter(str.isdigit, query_img))))
         dataset.headers.insert(len(dataset.headers), str(query_id))
     model = ResnetFeature()
-    for target_img in image_filenames:
+    for target_img in tqdm(image_filenames):
         print('target_img:', target_img)
         target_id = int(''.join(list(filter(str.isdigit, target_img))))
         # 特征抽取网络生成target image向量
