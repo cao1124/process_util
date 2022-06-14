@@ -64,5 +64,5 @@ def similarity_calculate(target_img, query_img_dir):
 
 if __name__ == '__main__':
     target_img = 'merged.tiff'
-    query_img_dir = 'D:/PycharmProjects/skin-disease-classification-by-ride/data/us_label_mask1/'
+    query_img_dir = '/home/ai1000/project/skin-disease-classification-by-ride/data/us_label_mask1/'
     similarity_calculate(target_img, query_img_dir)
