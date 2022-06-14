@@ -37,7 +37,7 @@ def similarity_calculate(target_img, query_img_dir):
         dataset.headers.insert(len(dataset.headers), str(query_id))
     model = ResnetFeature()
     for target_img in image_filenames:
-        # print('target_img:', target_img)
+        print('target_img:', target_img)
         target_id = int(''.join(list(filter(str.isdigit, target_img))))
         # 特征抽取网络生成target image向量
         target_feature = model.execute(os.path.join(query_img_dir, target_img))
