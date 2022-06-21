@@ -3,6 +3,8 @@ import numpy as np
 import os
 import shutil
 import pandas as pd
+from PIL import Image
+from tqdm import tqdm
 
 from utils.image_utils import is_image_file, cv_imread, cv_write
 
@@ -513,18 +515,107 @@ def merge_us_rgb():
 
 
 def prepare_txt():
-    image_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/"
-    result = []
-    with open('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/839data.txt', 'r') as txt_file:
+    two_class_result = []
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/1351data.txt', 'r') as txt_file:
         for item in txt_file:
-            if os.path.exists(image_dir + item.split(',')[0].split('.jpg')[0] + '.tiff'):
-                result.append(item)
-    with open('839.txt', 'w') as file:
-        for i in result:
+            print(item)
+            print(item.split(',')[1])
+            if int(item.split(',')[1]) <= 12:
+                res_str = item.split(',')[0] + ',0'
+            else:
+                res_str = item.split(',')[0] + ',1'
+            two_class_result.append(res_str)
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/two-class.txt', 'w') as file:
+        for i in two_class_result:
+            file.write(i + '\n')
+        file.close()
+    benign_result, malignant_result = [], []
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/1351data.txt', 'r') as txt_file:
+        for item in txt_file:
+            if int(item.split(',')[1]) <= 12:
+                benign_result.append(item)
+            else:
+                malignant_result.append(item)
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/benign.txt', 'w') as file:
+        for i in benign_result:
             file.write(i)
+        file.close()
+
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/malignant.txt', 'w') as file:
+        for i in malignant_result:
+            file.write(i)
+        file.close()
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/benign.txt', 'r', encoding='gb2312') as f:
+        c = f.readlines()
+        for line in f:
+            print(line.split(',')[0])
+            print(int(line.split(',')[1]))
+
+    image_dir = "D:/PycharmProjects/data/skin_data/us_label_mask1/expand_images/square"
+    images = [x for x in os.listdir(image_dir) if is_image_file(x)]
+    for i in images:
+        print(i)
+        # print(i)
+        # query_id = int(''.join(list(filter(str.isdigit, i))))
+        # print(query_id)
+
+    # with open('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/839data.txt', 'r') as txt_file:
+    #     for item in txt_file:
+    #         if os.path.exists(image_dir + item.split(',')[0].split('.jpg')[0] + '.tiff'):
+    #             result.append(item)
+    # with open('839.txt', 'w') as file:
+    #     for i in result:
+    #         file.write(i)
+
+
+def square_expand(pil_img, background_color):
+    width, height = pil_img.size
+    if width == height:
+        return pil_img
+    elif width > height:
+        result = Image.new(pil_img.mode, (width, width), background_color)
+        result.paste(pil_img, (0, (width - height) // 2))
+        return result
+    else:
+        result = Image.new(pil_img.mode, (height, height), background_color)
+        result.paste(pil_img, ((height - width) // 2, 0))
+        return result
+
+
+def square_expand_max(pil_img, square_max, background_color):
+    width, height = pil_img.size
+    if width > height:
+        result = Image.new(pil_img.mode, (square_max, square_max), background_color)
+        result.paste(pil_img, (0, (square_max - height) // 2))
+        return result
+    else:
+        result = Image.new(pil_img.mode, (square_max, square_max), background_color)
+        result.paste(pil_img, ((square_max - width) // 2, 0))
+        return result
+
+
+def expand_image():
+    img_path = 'D:/PycharmProjects/data/skin_data/us_label_mask1/images/'
+    out_path = 'D:/PycharmProjects/data/skin_data/us_label_mask1/expand_images/'
+    images = [x for x in os.listdir(img_path) if is_image_file(x)]
+    # h_list, w_list = [], []
+    # for i in images:
+    #     img = Image.open(os.path.join(img_path, i))
+    #     w, h = img.size
+    #     h_list.append(h)
+    #     w_list.append(w)
+    # h_max = max(h_list)
+    # w_max = max(w_list)
+    # h_max = 692
+    # w_max = 1315
+    for i in images:
+        img = Image.open(os.path.join(img_path, i))
+        img_res = square_expand(img, 0)
+        img_res.save(os.path.join(out_path, i))
 
 
 if __name__ == '__main__':
+
     # change_endwith()
     # show_image()
     # get_pixel_RGB_HSV()
@@ -534,4 +625,6 @@ if __name__ == '__main__':
     # crop_by_mask()
     # merge_us_rgb()
     prepare_txt()
+    # expand_image()
+
 
