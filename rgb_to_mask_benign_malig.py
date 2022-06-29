@@ -287,10 +287,10 @@ def crop_image_by_hsv():
 
 
         '''
-    orig_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img/"
-    label_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_label/"
+    orig_dir = "D:/MAD_File/上海_皮肤病/us_img/2/"
+    label_dir = "D:/MAD_File/上海_皮肤病/us_label/"
 
-    dst_dir = "D:/MAD_File/上海_皮肤病/上海_皮肤病/photo1/"
+    dst_dir = "D:/MAD_File/上海_皮肤病/us_skin_crop/2/"
     make_dir(dst_dir)
 
     images = [x for x in os.listdir(orig_dir) if is_image_file(x)]
@@ -301,19 +301,28 @@ def crop_image_by_hsv():
     count_green, count_red, count_yellow, count_blue, count_pink, count_purple = 0, 0, 0, 0, 0, 0
 
     for img_name in images:
-        print(img_name)
         # img = cv2.imread(orig_img_dir + name, cv2.IMREAD_COLOR)
         ori_img = cv_imread(orig_dir + img_name)
         if os.path.exists(label_dir + img_name):
             label_img = cv_imread(label_dir + img_name)
         else:
             if img_name.endswith('.jpeg'):
-                label_img = cv_imread(label_dir + img_name.split('.jpeg')[0] + '.jpg')
+                img_name = img_name.split('.jpeg')[0] + '.jpg'
+                label_img = cv_imread(label_dir + img_name)
+            elif img_name.endswith('.tiff'):
+                img_name = img_name.split('.tiff')[0] + '.jpg'
+                label_img = cv_imread(label_dir + img_name)
+            elif img_name.endswith('.bmp'):
+                img_name = img_name.split('.bmp')[0] + '.jpg'
+                label_img = cv_imread(label_dir + img_name)
+            elif img_name.endswith('.png'):
+                img_name = img_name.split('.png')[0] + '.jpg'
+                label_img = cv_imread(label_dir + img_name)
 
         # 设定颜色HSV范围，假定为红色
         # redLower = np.array([156, 43, 46])
         # redUpper = np.array([179, 255, 255])
-        yellowLower = np.array([10, 100, 100])    # [26, 43, 46]
+        yellowLower = np.array([26, 43, 46])    # [26, 43, 46]   [10, 100, 100]
         yellowUpper = np.array([34, 255, 255])
         hsv = cv2.cvtColor(label_img, cv2.COLOR_BGR2HSV)
         # 去除颜色范围外的其余颜色
@@ -336,15 +345,24 @@ def crop_image_by_hsv():
             max_idx = np.argmax(np.array(area))
             max_area = contours[max_idx]
             x, y, w, h = cv2.boundingRect(contours[max_idx])
-            crop_img = ori_img[y:y + h, x:x + w]
+            # crop_img = ori_img[y:y + h, x:x + w]
+            if y - 100 > 90:
+                crop_img = ori_img[y - 100:y + h + 100, x-100:x+w+100]
+            else:
+                crop_img = ori_img[90:y + h + 100, x-100:x+w+100]
+            if crop_img.size == 0:
+                print(img_name)
+            else:
+                img1 = cv2.resize(label_img, (640, 640))
+                img2 = cv2.resize(crop_img, (640, 640))
+                if img1.size == img2.size:
+                    new_img = np.hstack([img1, img2])
+                    cv2.imshow('img_name', new_img)
+                    cv2.waitKey(200)
 
-            # img1 = cv2.resize(label_img, (640, 640))
-            # img2 = cv2.resize(crop_img, (640, 640))
-            # new_img = np.hstack([img1, img2])
-            # cv2.imshow(img_name, new_img)
-            # cv2.waitKey(0)
-
-            cv_write(dst_dir + img_name, crop_img)
+                    cv_write(dst_dir + img_name, crop_img)
+                else:
+                    print(img_name)
 
             # cv2.boundingRect()返回轮廓矩阵的坐标值，四个值为x, y, w, h， 其中x, y为左上角坐标，w,h为矩阵的宽和高
             # boxes = [cv2.boundingRect(c) for c in contours[0]]
@@ -594,7 +612,24 @@ def expand_image():
         img_res.save(os.path.join(out_path, i))
 
 
+def convert_4to3_channel():
+    # 将一个4通道转化为rgb三通道
+    from PIL import Image
+    img = Image.open('D:/MAD_File/上海_皮肤病/us_img/0/D48837 全SK.png')
+    img = img.convert("RGB")
+    img.save('D:/MAD_File/上海_皮肤病/us_img/0/D48837 全SK.jpg')
+
+
 if __name__ == '__main__':
+    images = [x for x in os.listdir('D:/MAD_File/上海_皮肤病/us_skin_crop/') if is_image_file(x)]
+    with open('D:/PycharmProjects/data/skin_data/us_label_mask1/1351data.txt', 'r', encoding='utf-8') as file:
+        for i in file:
+            a = i.split(',')[0]
+            if a not in images:
+                print(a)
+    print('..')
+
+    # convert_4to3_channel()
     # change_endwith()
     # show_image()
     # get_pixel_RGB_HSV()

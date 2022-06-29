@@ -275,8 +275,8 @@ def data_prepare_all():
                 dataset.append([img_id, SkinDisease27.MM.value, SkinDisease27.MM.name])
             else:
                 dataset.append([img_id, SkinDisease27.其他恶性.value, SkinDisease27.其他恶性.name])
-    with open('class27.csv', mode='w', encoding='UTF-8') as f:
-        f.write(dataset.csv)
+    with open('similarity_calculate.xlsx', mode='wb') as f:
+        f.write(dataset.xlsx)
 
 
 def prepare_txt():
