@@ -46,10 +46,7 @@ def compute_mean_and_std(dataset):
 
 
 if __name__ == '__main__':
-    test_cls_num_list = np.asarray([55, 10, 9, 26, 89, 19, 21, 27, 189, 17, 40, 20, 76, 17, 98, 84, 21, 144, 265, 10, 9, 80])
-    assert test_cls_num_list.all(test_cls_num_list[0])
-
-    path = "D:/PycharmProjects/skin-disease-classification-by-ride/data/us"
+    path = "D:/MAD_File/上海_皮肤病/photo_img_crop/"
     train_data = torchvision.datasets.ImageFolder(path)
     train_mean, train_std = compute_mean_and_std(train_data.imgs)
     print(train_mean, train_std)
